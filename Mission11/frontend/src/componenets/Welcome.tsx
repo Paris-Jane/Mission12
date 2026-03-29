@@ -1,19 +1,46 @@
-// Welcome.tsx: 
-import { ShoppingCart } from "lucide-react";
+// Welcome.tsx
+import { ShoppingCart, BookOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useCart } from "../context/CartContext";
 
 function Welcome() {
     const navigate = useNavigate();
+    const { cartItems } = useCart();
+    const totalQty = cartItems.reduce((sum, i) => sum + i.quantity, 0);
+    const subtotal = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+
     return (
-        <div className="mb-4">
-            <h1 className="fw-bold mb-0">Hilton's Books</h1>
-            <button type="button" className="btn btn-primary me-2" onClick={() => navigate("/cart")}>
-                <ShoppingCart className="me-1" size={18} aria-hidden />
-                Cart
-            </button>
-            <p>Welcome to Hilton's Books! Here you can find a collection of books that Hilton has read and enjoyed.</p>
-        </div>
-    )
+        <>
+            {/* ── Sticky Navbar ── */}
+            <nav className="store-navbar">
+                <div className="container">
+                    <div className="nav-inner">
+                        <div>
+                            <div className="brand" style={{ cursor: "pointer" }} onClick={() => navigate("/")}>
+                                Hilton's<span>&nbsp;Books</span>
+                            </div>
+                            <div className="tagline">A curated collection</div>
+                        </div>
+                        <button
+                            type="button"
+                            className="btn-cart"
+                            onClick={() => navigate("/cart")}
+                        >
+                            <ShoppingCart size={16} />
+                            Cart
+                            {totalQty > 0 && (
+                                <span className="cart-badge">{totalQty}</span>
+                            )}
+                            {subtotal > 0 && (
+                                <span className="price-badge">${subtotal.toFixed(2)}</span>
+                            )}
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+        </>
+    );
 }
 
 export default Welcome;

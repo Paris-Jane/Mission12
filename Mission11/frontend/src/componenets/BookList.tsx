@@ -1,8 +1,22 @@
-// BookList.tsx: 
+// BookList.tsx
 import { useEffect, useState } from "react";
 import type { Book } from "../types/Book.ts";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { ShoppingCart, Eye, ChevronLeft, ChevronRight } from "lucide-react";
+
+// Cycle through a few warm spine accent colours for variety
+const SPINE_COLORS = [
+    "var(--amber)",
+    "var(--rust)",
+    "var(--sage)",
+    "#7b6ea0",
+    "#3d7a8a",
+];
+
+function spineColor(index: number) {
+    return SPINE_COLORS[index % SPINE_COLORS.length];
+}
 
 function BookList({ selectedCategories }: { selectedCategories: string[] }) {
     const [books, setBooks] = useState<Book[]>([]);
@@ -11,54 +25,99 @@ function BookList({ selectedCategories }: { selectedCategories: string[] }) {
     const [totalItems, setTotalItems] = useState<number>(0);
     const [totalPages, setTotalPages] = useState<number>(0);
     const [sortTitleAsc, setSortTitleAsc] = useState<boolean>(true);
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
     const { addToCart } = useCart();
 
     useEffect(() => {
         const fetchBooks = async () => {
-            const categoryParams = selectedCategories
-                .map((cat) => `categoryTypes=${encodeURIComponent(cat)}`)
-                .join('&');
-        
-            const response = await fetch(
-                `http://localhost:4040/api/Book/AllBooks?pageHowMany=${pageSize}&pageNum=${pageNum}&sortTitleAsc=${sortTitleAsc}${selectedCategories.length ? `&${categoryParams}` : ''}` 
-            );
-            const data = await response.json();
-            setBooks(data.books);
-            setTotalItems(data.totalNumBooks);
-            setTotalPages(Math.ceil(data.totalNumBooks / pageSize));
+            setLoading(true);
+            try {
+                const categoryParams = selectedCategories
+                    .map((cat) => `categoryTypes=${encodeURIComponent(cat)}`)
+                    .join("&");
+
+                const response = await fetch(
+                    `http://localhost:4040/api/Book/AllBooks?pageHowMany=${pageSize}&pageNum=${pageNum}&sortTitleAsc=${sortTitleAsc}${
+                        selectedCategories.length ? `&${categoryParams}` : ""
+                    }`
+                );
+                const data = await response.json();
+                setBooks(data.books);
+                setTotalItems(data.totalNumBooks);
+                setTotalPages(Math.ceil(data.totalNumBooks / pageSize));
+            } finally {
+                setLoading(false);
+            }
         };
         fetchBooks();
     }, [pageSize, pageNum, sortTitleAsc, selectedCategories]);
 
+    // Build page number array (max 7 visible)
+    const pageNumbers = () => {
+        const pages: (number | "…")[] = [];
+        if (totalPages <= 7) {
+            for (let i = 1; i <= totalPages; i++) pages.push(i);
+        } else {
+            pages.push(1);
+            if (pageNum > 3) pages.push("…");
+            for (
+                let i = Math.max(2, pageNum - 1);
+                i <= Math.min(totalPages - 1, pageNum + 1);
+                i++
+            )
+                pages.push(i);
+            if (pageNum < totalPages - 2) pages.push("…");
+            pages.push(totalPages);
+        }
+        return pages;
+    };
+
     return (
-        <div className="container py-5" style={{ maxWidth: "700px" }}>
-
-            <p className="text-muted small mb-3 mb-md-4">
-                {totalItems} titles in the collection
-            </p>
-
-            {/* Toolbar */}
-            <div className="d-flex gap-3 align-items-end mb-4 pb-3 border-bottom">
-                <div>
-                    <label className="form-label small fw-semibold mb-1 d-block">Sort</label>
-                    <select
-                        className="form-select form-select-sm"
-                        style={{ width: "auto" }}
-                        value={sortTitleAsc ? "asc" : "desc"}
-                        onChange={(e) => { setSortTitleAsc(e.target.value === "asc"); setPageNum(1); }}
-                    >
-                        <option value="asc">Title: A → Z</option>
-                        <option value="desc">Title: Z → A</option>
-                    </select>
+        <div>
+            {/* ── Toolbar ── */}
+            <div className="books-toolbar">
+                <div className="result-count">
+                    Showing{" "}
+                    <strong>
+                        {totalItems} title{totalItems !== 1 ? "s" : ""}
+                    </strong>
+                    {selectedCategories.length > 0 && (
+                        <span>
+                            {" "}
+                            in{" "}
+                            <strong>
+                                {selectedCategories.length} categor
+                                {selectedCategories.length === 1 ? "y" : "ies"}
+                            </strong>
+                        </span>
+                    )}
                 </div>
-                <div>
-                    <label className="form-label small fw-semibold mb-1 d-block">Show</label>
+
+                <div className="toolbar-controls">
+                    <span className="toolbar-label">Sort</span>
                     <select
-                        className="form-select form-select-sm"
-                        style={{ width: "auto" }}
+                        className="toolbar-select"
+                        value={sortTitleAsc ? "asc" : "desc"}
+                        onChange={(e) => {
+                            setSortTitleAsc(e.target.value === "asc");
+                            setPageNum(1);
+                        }}
+                    >
+                        <option value="asc">Title A → Z</option>
+                        <option value="desc">Title Z → A</option>
+                    </select>
+
+                    <span className="toolbar-label" style={{ marginLeft: 8 }}>
+                        Show
+                    </span>
+                    <select
+                        className="toolbar-select"
                         value={pageSize}
-                        onChange={(e) => { setPageSize(Number(e.target.value)); setPageNum(1); }}
+                        onChange={(e) => {
+                            setPageSize(Number(e.target.value));
+                            setPageNum(1);
+                        }}
                     >
                         <option value="5">5 per page</option>
                         <option value="10">10 per page</option>
@@ -67,70 +126,136 @@ function BookList({ selectedCategories }: { selectedCategories: string[] }) {
                 </div>
             </div>
 
-            {/* Book rows */}
-            <div>
-                {books.map((b) => (
-                    <div key={b.bookId} className="d-flex justify-content-between align-items-start py-3 border-bottom gap-4">
-                        {/* Left: all book info */}
-                        <div>
-                            <div className="fw-bold mb-1" style={{ fontSize: "1rem" }}>{b.title}</div>
-                            <div className="text-muted mb-2" style={{ fontSize: "0.875rem" }}>
-                                {b.author} &nbsp;·&nbsp; {b.publisher}
+            {/* ── Book List ── */}
+            {loading ? (
+                <div className="state-box">
+                    <div className="spinner" />
+                    <p>Loading books…</p>
+                </div>
+            ) : books.length === 0 ? (
+                <div className="state-box">
+                    <p style={{ fontSize: "1.1rem" }}>No books found.</p>
+                    <p style={{ fontSize: ".85rem" }}>Try adjusting your filters.</p>
+                </div>
+            ) : (
+                <div>
+                    {books.map((b, idx) => (
+                        <div key={b.bookId} className="book-card">
+                            {/* Coloured spine accent */}
+                            <div
+                                className="book-spine"
+                                style={{ background: spineColor(idx) }}
+                            />
+
+                            {/* Book info */}
+                            <div className="book-info">
+                                <div className="book-title">{b.title}</div>
+                                <div className="book-meta">
+                                    <span>{b.author}</span>
+                                    <span>{b.publisher}</span>
+                                </div>
+                                <div className="book-tags">
+                                    <span className="tag tag-category">
+                                        {b.category}
+                                    </span>
+                                    <span className="tag tag-detail">
+                                        {b.classification}
+                                    </span>
+                                    <span className="tag tag-detail">
+                                        {b.pageCount} pp
+                                    </span>
+                                    <span className="tag tag-detail">
+                                        ISBN {b.isbn}
+                                    </span>
+                                </div>
                             </div>
-                            <div className="d-flex flex-wrap gap-1">
-                                <span className="badge text-bg-secondary fw-normal">{b.classification}</span>
-                                <span className="badge text-bg-secondary fw-normal">{b.category}</span>
-                                <span className="badge text-bg-light border fw-normal text-muted">{b.pageCount} pages</span>
-                                <span className="badge text-bg-light border fw-normal text-muted">ISBN {b.isbn}</span>
+
+                            {/* Price + actions */}
+                            <div className="book-right">
+                                <div className="book-price">${b.price.toFixed(2)}</div>
+                                <div className="book-actions">
+                                    <button
+                                        className="btn-secondary-store"
+                                        onClick={() =>
+                                            navigate(`/bookDetails/${b.bookId}`)
+                                        }
+                                        title="View details"
+                                    >
+                                        <Eye size={14} />
+                                        Details
+                                    </button>
+                                    <button
+                                        className="btn-primary-store"
+                                        onClick={() => {
+                                            addToCart({
+                                                bookId: b.bookId,
+                                                title: b.title,
+                                                price: b.price,
+                                                quantity: 1,
+                                            });
+                                        }}
+                                        title="Add to cart"
+                                    >
+                                        <ShoppingCart size={14} />
+                                        Quick Add
+                                    </button>
+                                </div>
                             </div>
                         </div>
+                    ))}
+                </div>
+            )}
 
-                        {/* Right: price */}
-                        <div className="fw-bold text-nowrap" style={{ fontSize: "1rem" }}>
-                            ${b.price}
-                        </div>
-
-                        {/* Buttons  */}
+            {/* ── Pagination ── */}
+            {totalPages > 1 && (
+                <div className="pagination-area">
+                    <span className="page-info">
+                        Page {pageNum} of {totalPages}
+                    </span>
+                    <div className="page-btns">
                         <button
-                            type="button"
-                            className="btn btn-primary"
-                            onClick={() => {
-                                addToCart({
-                                    bookId: b.bookId,
-                                    title: b.title,
-                                    price: b.price,
-                                    quantity: 1,
-                                });
-                                navigate("/");
-                            }}
+                            className="page-btn page-btn-wide"
+                            disabled={pageNum === 1}
+                            onClick={() => setPageNum(pageNum - 1)}
                         >
-                            Quick Add
+                            <ChevronLeft size={14} />
                         </button>
-                        <button className="btn btn-primary" onClick={() => navigate(`/bookDetails/${b.bookId}`)}>View Details</button>
 
+                        {pageNumbers().map((p, i) =>
+                            p === "…" ? (
+                                <span
+                                    key={`ellipsis-${i}`}
+                                    style={{
+                                        display: "inline-flex",
+                                        alignItems: "center",
+                                        padding: "0 4px",
+                                        color: "var(--ink-muted)",
+                                        fontSize: ".82rem",
+                                    }}
+                                >
+                                    …
+                                </span>
+                            ) : (
+                                <button
+                                    key={p}
+                                    className={`page-btn ${pageNum === p ? "active" : ""}`}
+                                    onClick={() => setPageNum(p as number)}
+                                >
+                                    {p}
+                                </button>
+                            )
+                        )}
+
+                        <button
+                            className="page-btn page-btn-wide"
+                            disabled={pageNum === totalPages || totalPages === 0}
+                            onClick={() => setPageNum(pageNum + 1)}
+                        >
+                            <ChevronRight size={14} />
+                        </button>
                     </div>
-                ))}
-            </div>
-
-            {/* Pagination */}
-            <div className="d-flex justify-content-between align-items-center mt-4">
-                <span className="text-muted small">Page {pageNum} of {totalPages}</span>
-                <nav>
-                    <ul className="pagination pagination-sm mb-0">
-                        <li className={`page-item ${pageNum === 1 ? "disabled" : ""}`}>
-                            <button className="page-link" onClick={() => setPageNum(pageNum - 1)}>← Prev</button>
-                        </li>
-                        {[...Array(totalPages)].map((_, i) => (
-                            <li key={i + 1} className={`page-item ${pageNum === i + 1 ? "active" : ""}`}>
-                                <button className="page-link" onClick={() => setPageNum(i + 1)}>{i + 1}</button>
-                            </li>
-                        ))}
-                        <li className={`page-item ${pageNum === totalPages || totalPages === 0 ? "disabled" : ""}`}>
-                            <button className="page-link" onClick={() => setPageNum(pageNum + 1)}>Next →</button>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
+                </div>
+            )}
         </div>
     );
 }
