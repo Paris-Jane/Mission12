@@ -1,0 +1,47 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+
+# Logs
+*.log
+
+# =========================
+# .NET / C#
+# =========================
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.dll
+*.exe
+*.pdb
+
+# Rider / Visual Studio
+*.DotSettings.user
+
+# =========================
+# Node / React / Vite
+# =========================
+node_modules/
+dist/
+build/
+
+# Env files
+.env
+.env.*
+
+# =========================
+# Database
+# =========================
+*.sqlite
+*.db
+
+# =========================
+# Misc
+# =========================
+coverage/

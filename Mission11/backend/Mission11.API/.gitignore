@@ -1,0 +1,11 @@
+bin/ 
+obj/
+.vs/
+ 
+*.suo
+.idea/
+*.DotSettings.user
+*.user
+*.sln.dostates
+*.log
+*.tlog
