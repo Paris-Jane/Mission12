@@ -1,18 +1,27 @@
+// BookList.tsx: 
 import { useEffect, useState } from "react";
-import type { Book } from "./types/Book.ts";
+import type { Book } from "../types/Book.ts";
+import { useNavigate } from "react-router-dom";
+import { useCart } from "../context/CartContext";
 
-function BookList() {
+function BookList({ selectedCategories }: { selectedCategories: string[] }) {
     const [books, setBooks] = useState<Book[]>([]);
     const [pageSize, setPageSize] = useState<number>(5);
     const [pageNum, setPageNum] = useState<number>(1);
     const [totalItems, setTotalItems] = useState<number>(0);
     const [totalPages, setTotalPages] = useState<number>(0);
     const [sortTitleAsc, setSortTitleAsc] = useState<boolean>(true);
+    const navigate = useNavigate();
+    const { addToCart } = useCart();
 
     useEffect(() => {
         const fetchBooks = async () => {
+            const categoryParams = selectedCategories
+                .map((cat) => `categoryTypes=${encodeURIComponent(cat)}`)
+                .join('&');
+        
             const response = await fetch(
-                `http://localhost:4040/api/Book/AllBooks?pageHowMany=${pageSize}&pageNum=${pageNum}&sortTitleAsc=${sortTitleAsc}`
+                `http://localhost:4040/api/Book/AllBooks?pageHowMany=${pageSize}&pageNum=${pageNum}&sortTitleAsc=${sortTitleAsc}${selectedCategories.length ? `&${categoryParams}` : ''}` 
             );
             const data = await response.json();
             setBooks(data.books);
@@ -20,18 +29,14 @@ function BookList() {
             setTotalPages(Math.ceil(data.totalNumBooks / pageSize));
         };
         fetchBooks();
-    }, [pageSize, pageNum, sortTitleAsc]);
+    }, [pageSize, pageNum, sortTitleAsc, selectedCategories]);
 
     return (
         <div className="container py-5" style={{ maxWidth: "700px" }}>
 
-            {/* Header */}
-            <div className="mb-4">
-                <h1 className="fw-bold mb-0">Hilton's Books</h1>
-                <p className="text-muted mt-1 mb-0">
-                    {totalItems} titles in the collection
-                </p>
-            </div>
+            <p className="text-muted small mb-3 mb-md-4">
+                {totalItems} titles in the collection
+            </p>
 
             {/* Toolbar */}
             <div className="d-flex gap-3 align-items-end mb-4 pb-3 border-bottom">
@@ -84,6 +89,25 @@ function BookList() {
                         <div className="fw-bold text-nowrap" style={{ fontSize: "1rem" }}>
                             ${b.price}
                         </div>
+
+                        {/* Buttons  */}
+                        <button
+                            type="button"
+                            className="btn btn-primary"
+                            onClick={() => {
+                                addToCart({
+                                    bookId: b.bookId,
+                                    title: b.title,
+                                    price: b.price,
+                                    quantity: 1,
+                                });
+                                navigate("/");
+                            }}
+                        >
+                            Quick Add
+                        </button>
+                        <button className="btn btn-primary" onClick={() => navigate(`/bookDetails/${b.bookId}`)}>View Details</button>
+
                     </div>
                 ))}
             </div>

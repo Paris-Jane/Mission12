@@ -15,19 +15,28 @@ public class BookController : Controller
     }
     
     [HttpGet("AllBooks")]
-    public IActionResult GetProjects(int pageHowMany = 5, int pageNum = 1, bool sortTitleAsc = true)
+    public IActionResult GetProjects(
+        int pageHowMany = 5,
+        int pageNum = 1,
+        bool sortTitleAsc = true,
+        [FromQuery] List<string>? categoryTypes = null)
     {
         // Build a sorted query first; Skip/Take must run after OrderBy for correct paging.
-        IQueryable<Book> ordered = sortTitleAsc
+        IQueryable<Book> query = sortTitleAsc
             ? _dbContext.Books.OrderBy(b => b.Title)
             : _dbContext.Books.OrderByDescending(b => b.Title);
 
-        var pageOfBooks = ordered
+        if (categoryTypes is { Count: > 0 })
+        {
+            query = query.Where(b => categoryTypes.Contains(b.Category));
+        }
+
+        var totalNumBooks = query.Count();
+
+        var pageOfBooks = query
             .Skip((pageNum - 1) * pageHowMany)
             .Take(pageHowMany)
             .ToList();
-
-        var totalNumBooks = _dbContext.Books.Count();
 
         var someObject = new
         {
@@ -36,5 +45,27 @@ public class BookController : Controller
         };
 
         return Ok(someObject);
+    }
+
+    [HttpGet("FilterBooks")]
+    public IActionResult FilterBooks([FromQuery] string? filter = null)
+    {
+        var filteredBooks = _dbContext.Books
+        .Select(b => b.Category)
+        .Distinct()
+        .ToList();
+
+        return Ok(filteredBooks);
+    }
+
+    [HttpGet("BookDetails/{bookId}")]
+    public IActionResult BookDetails(int bookId)
+    {
+        var book = _dbContext.Books.FirstOrDefault(b => b.BookId == bookId);
+        if (book == null)
+        {
+            return NotFound();
+        }
+        return Ok(book);
     }
 }
