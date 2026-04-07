@@ -1,5 +1,5 @@
 // Welcome.tsx
-import { ShoppingCart, BookOpen } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 
