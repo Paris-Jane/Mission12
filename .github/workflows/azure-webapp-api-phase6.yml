@@ -1,0 +1,35 @@
+# Deploy Mission11.API to Azure App Service on pushes to phase-6.
+# Add these repository secrets (GitHub → Settings → Secrets → Actions):
+#   AZURE_WEBAPP_NAME          — App Service name (e.g. mission13backend2-hnhpf9bmdvf7c0hf)
+#   AZURE_WEBAPP_PUBLISH_PROFILE — full XML from Azure Portal → App → Download publish profile
+name: Deploy API to Azure (phase-6)
+
+on:
+  push:
+    branches:
+      - phase-6
+    paths:
+      - "Mission11/backend/**"
+      - ".github/workflows/azure-webapp-api-phase6.yml"
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Publish
+        run: dotnet publish Mission11/backend/Mission11.API/Mission11.API.csproj -c Release -o ./publish
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ./publish
