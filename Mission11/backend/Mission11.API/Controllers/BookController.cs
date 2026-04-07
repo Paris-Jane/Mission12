@@ -69,9 +69,9 @@ public class BookController : Controller
         return Ok(book);
     }
 
-    // Named routes (assignment-style) + REST-style so clients can POST/PUT/DELETE api/Book/...
+    // "" = POST .../api/Book (bare [HttpPost] would incorrectly bind to .../api/Book/AddBook only)
     [HttpPost("AddBook")]
-    [HttpPost]
+    [HttpPost("")]
     public IActionResult AddBook([FromBody] Book book)
     {
         if (!ModelState.IsValid)
@@ -97,7 +97,7 @@ public class BookController : Controller
         var existing = _dbContext.Books.Find(bookId);
         if (existing == null)
         {
-            return NotFound();
+            return NotFound(new { message = $"No book with id {bookId} exists in the database." });
         }
 
         existing.Title = updated.Title;
@@ -120,7 +120,7 @@ public class BookController : Controller
         var book = _dbContext.Books.Find(bookId);
         if (book == null)
         {
-            return NotFound();
+            return NotFound(new { message = $"No book with id {bookId} exists in the database." });
         }
 
         _dbContext.Books.Remove(book);

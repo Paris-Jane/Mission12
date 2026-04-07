@@ -21,8 +21,12 @@ async function readErrorDetail(response: Response): Promise<string> {
         const text = await response.text();
         if (!text) return response.statusText || String(response.status);
         try {
-            const json = JSON.parse(text) as { title?: string; detail?: string; message?: string };
-            return json.detail ?? json.title ?? json.message ?? text.slice(0, 200);
+            const json = JSON.parse(text) as {
+                title?: string;
+                detail?: string;
+                message?: string;
+            };
+            return json.message ?? json.detail ?? json.title ?? text.slice(0, 200);
         } catch {
             return text.slice(0, 200);
         }
@@ -61,9 +65,9 @@ export const fetchAllBooksForAdmin = async (): Promise<Book[]> => {
     return data.books;
 };
 
-/** POST .../api/Book (REST) — also supported: .../api/Book/AddBook */
+/** Explicit action routes (reliable on Azure); backend also accepts POST .../api/Book via [HttpPost("")] */
 export const addBook = async (newBook: Book): Promise<Book> => {
-    const response = await fetch(API_URL, {
+    const response = await fetch(`${API_URL}/AddBook`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -79,12 +83,11 @@ export const addBook = async (newBook: Book): Promise<Book> => {
     return await response.json();
 };
 
-/** PUT .../api/Book/{id} (REST) — also supported: .../api/Book/UpdateBook/{id} */
 export const updateBook = async (
     bookId: number,
     updatedBook: Book
 ): Promise<Book> => {
-    const response = await fetch(`${API_URL}/${bookId}`, {
+    const response = await fetch(`${API_URL}/UpdateBook/${bookId}`, {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
@@ -100,9 +103,8 @@ export const updateBook = async (
     return await response.json();
 };
 
-/** DELETE .../api/Book/{id} (REST) — also supported: .../api/Book/DeleteBook/{id} */
 export const deleteBook = async (bookId: number): Promise<void> => {
-    const response = await fetch(`${API_URL}/${bookId}`, {
+    const response = await fetch(`${API_URL}/DeleteBook/${bookId}`, {
         method: "DELETE",
     });
 
