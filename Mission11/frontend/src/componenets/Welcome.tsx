@@ -1,5 +1,5 @@
 // Welcome.tsx
-import { ShoppingCart } from "lucide-react";
+import { BookOpen, ShoppingCart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 
@@ -23,11 +23,14 @@ function Welcome() {
                         </div>
                         <button
                             type="button"
-                            className="btn btn-link text-white text-decoration-none px-2 py-1 me-1"
+                            className="btn btn-link text-white text-decoration-none px-2 py-1 me-1 d-inline-flex align-items-center gap-1"
                             style={{ fontSize: "0.85rem" }}
                             onClick={() => navigate("/adminbooks")}
+                            title="Open the book manager: add new titles, edit details, or remove books from the database."
+                            aria-label="Manage books — add, edit, or delete books in the database"
                         >
-                            Admin
+                            <BookOpen size={16} strokeWidth={2} aria-hidden />
+                            <span>Manage books</span>
                         </button>
                         <button
                             type="button"
