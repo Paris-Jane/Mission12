@@ -8,22 +8,22 @@ public class Book
     public int BookId { get; set; }
 
     [Required]
-    public string Title { get; set; }
+    public required string Title { get; set; }
 
     [Required]
-    public string Author { get; set; }
+    public required string Author { get; set; }
 
     [Required]
-    public string Publisher { get; set; }
+    public required string Publisher { get; set; }
 
     [Required]
-    public string Isbn { get; set; }
+    public required string Isbn { get; set; }
 
     [Required]
-    public string Classification { get; set; }
+    public required string Classification { get; set; }
 
     [Required]
-    public string Category { get; set; }
+    public required string Category { get; set; }
 
     [Required]
     public int PageCount { get; set; }
