@@ -24,7 +24,7 @@ function Cart() {
                         {/* Heading */}
                         <div className="d-flex align-items-center gap-3 mb-1">
                             <ShoppingCart size={24} color="var(--amber)" />
-                            <h1 className="cart-heading mb-0">Your Cart!</h1>
+                            <h1 className="cart-heading mb-0">Your Cart</h1>
                         </div>
                         <p className="cart-subhead">
                             {cartItems.length === 0
