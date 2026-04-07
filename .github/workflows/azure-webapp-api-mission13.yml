@@ -1,7 +1,19 @@
 # Deploy Mission11.API to Azure App Service on pushes to Mission13.
-# Add these repository secrets (GitHub → Settings → Secrets → Actions):
-#   AZURE_WEBAPP_NAME          — App Service name (e.g. mission13backend2-hnhpf9bmdvf7c0hf)
-#   AZURE_WEBAPP_PUBLISH_PROFILE — full XML from Azure Portal → App → Download publish profile
+#
+# Required GitHub Actions secrets (Repo → Settings → Secrets and variables → Actions):
+#   AZURE_WEBAPP_NAME   — App Service name only (e.g. mission13backend2-hnhpf9bmdvf7c0hf)
+#   AZURE_CREDENTIALS   — Output JSON from Azure CLI (see below). webapps-deploy often
+#                         needs this; publish-profile alone can fail with "No credentials found".
+#
+# Create AZURE_CREDENTIALS (run locally, signed in with `az login`):
+#   az ad sp create-for-rbac \
+#     --name "github-actions-mission13-api" \
+#     --role contributor \
+#     --scopes /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RESOURCE_GROUP> \
+#     --sdk-auth
+# Copy the entire JSON object into the AZURE_CREDENTIALS secret (name must stay AZURE_CREDENTIALS).
+#
+# Optional: you can keep AZURE_WEBAPP_PUBLISH_PROFILE for reference; this workflow does not use it.
 name: Deploy API to Azure (Mission13)
 
 on:
@@ -27,10 +39,13 @@ jobs:
       - name: Publish
         run: dotnet publish Mission11/backend/Mission11.API/Mission11.API.csproj -c Release -o ./publish
 
-      # v2 supports publish-profile alone; v3 often requires azure/login first.
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: ./publish
