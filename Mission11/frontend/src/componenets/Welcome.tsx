@@ -23,6 +23,14 @@ function Welcome() {
                         </div>
                         <button
                             type="button"
+                            className="btn btn-link text-white text-decoration-none px-2 py-1 me-1"
+                            style={{ fontSize: "0.85rem" }}
+                            onClick={() => navigate("/adminbooks")}
+                        >
+                            Admin
+                        </button>
+                        <button
+                            type="button"
                             className="btn-cart"
                             onClick={() => navigate("/cart")}
                         >

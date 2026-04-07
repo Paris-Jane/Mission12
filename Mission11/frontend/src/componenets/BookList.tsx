@@ -3,9 +3,9 @@ import type { Book } from "../types/Book.ts";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { ShoppingCart, Eye, ChevronLeft, ChevronRight } from "lucide-react";
+import { BOOK_API_BASE_URL } from "../api/BooksAPI";
 
-const API_URL =
-    "https://mission13backend2-hnhpf9bmdvf7c0hf.mexicocentral-01.azurewebsites.net/api/Book";
+const API_URL = BOOK_API_BASE_URL;
 
 const SPINE_COLORS = [
     "var(--amber)",

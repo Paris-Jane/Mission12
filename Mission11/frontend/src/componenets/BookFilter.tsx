@@ -1,6 +1,7 @@
 // BookFilter.tsx
 import { useState, useEffect } from "react";
 import { SlidersHorizontal, X } from "lucide-react";
+import { BOOK_API_BASE_URL } from "../api/BooksAPI";
 
 function BookFilter({
     selectedCategories,
@@ -14,7 +15,7 @@ function BookFilter({
     useEffect(() => {
         const fetchTypes = async () => {
             try {
-                const response = await fetch(`https://mission13backend2-hnhpf9bmdvf7c0hf.mexicocentral-01.azurewebsites.net/api/Book/FilterBooks`);
+                const response = await fetch(`${BOOK_API_BASE_URL}/FilterBooks`);
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const data = await response.json();
                 setFilters(data);

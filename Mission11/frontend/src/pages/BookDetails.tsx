@@ -5,6 +5,7 @@ import type { Book } from "../types/Book";
 import { useCart } from "../context/CartContext";
 import { ArrowLeft, ShoppingCart, Minus, Plus } from "lucide-react";
 import Welcome from "../componenets/Welcome";
+import { BOOK_API_BASE_URL } from "../api/BooksAPI";
 
 function BookDetails() {
     const navigate = useNavigate();
@@ -20,7 +21,7 @@ function BookDetails() {
         const fetchBook = async () => {
             try {
                 const response = await fetch(
-                    `http://localhost:4040/api/Book/BookDetails/${bookId}`
+                    `${BOOK_API_BASE_URL}/BookDetails/${bookId}`
                 );
                 if (!response.ok) throw new Error("Failed to fetch book");
                 const data = await response.json();
