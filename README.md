@@ -10,8 +10,6 @@ Bookstore app with a React storefront, .NET API, and SQLite database. Source liv
 
 To **add, edit, or delete books** in the database, open the live site and click **Manage books** in the top bar. That opens the admin page (`/adminbooks`) where you can maintain the catalog.
 
-If your Azure URLs change, update the frontend API base in `Mission11/frontend/src/api/BooksAPI.ts` (or set `VITE_BOOK_API_URL` in the Static Web App build configuration).
-
 ---
 
 ## Run on your machine (`main` branch)
