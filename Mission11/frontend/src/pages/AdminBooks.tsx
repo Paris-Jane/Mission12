@@ -81,8 +81,10 @@ function AdminBooks() {
             }
             setDraft(null);
             await loadBooks();
-        } catch {
-            setMessage({ type: "err", text: "Save failed. Check fields and try again." });
+        } catch (err) {
+            const text =
+                err instanceof Error ? err.message : "Save failed. Check fields and try again.";
+            setMessage({ type: "err", text });
         } finally {
             setSaving(false);
         }
@@ -95,8 +97,9 @@ function AdminBooks() {
             await deleteBook(b.bookId);
             setMessage({ type: "ok", text: "Book deleted." });
             await loadBooks();
-        } catch {
-            setMessage({ type: "err", text: "Delete failed." });
+        } catch (err) {
+            const text = err instanceof Error ? err.message : "Delete failed.";
+            setMessage({ type: "err", text });
         }
     };
 

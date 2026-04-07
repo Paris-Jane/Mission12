@@ -69,7 +69,9 @@ public class BookController : Controller
         return Ok(book);
     }
 
+    // Named routes (assignment-style) + REST-style so clients can POST/PUT/DELETE api/Book/...
     [HttpPost("AddBook")]
+    [HttpPost]
     public IActionResult AddBook([FromBody] Book book)
     {
         if (!ModelState.IsValid)
@@ -84,6 +86,7 @@ public class BookController : Controller
     }
 
     [HttpPut("UpdateBook/{bookId}")]
+    [HttpPut("{bookId:int}")]
     public IActionResult UpdateBook(int bookId, [FromBody] Book updated)
     {
         if (!ModelState.IsValid)
@@ -111,6 +114,7 @@ public class BookController : Controller
     }
 
     [HttpDelete("DeleteBook/{bookId}")]
+    [HttpDelete("{bookId:int}")]
     public IActionResult DeleteBook(int bookId)
     {
         var book = _dbContext.Books.Find(bookId);
