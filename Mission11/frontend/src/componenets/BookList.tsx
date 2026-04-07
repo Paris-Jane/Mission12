@@ -1,11 +1,12 @@
-// BookList.tsx
 import { useEffect, useState } from "react";
 import type { Book } from "../types/Book.ts";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { ShoppingCart, Eye, ChevronLeft, ChevronRight } from "lucide-react";
 
-// Cycle through a few warm spine accent colours for variety
+const API_URL =
+    "https://mission13backend2-hnhpf9bmdvf7c0hf.mexicocentral-01.azurewebsites.net/api/Book";
+
 const SPINE_COLORS = [
     "var(--amber)",
     "var(--rust)",
@@ -38,22 +39,32 @@ function BookList({ selectedCategories }: { selectedCategories: string[] }) {
                     .join("&");
 
                 const response = await fetch(
-                    `http://localhost:4040/api/Book/AllBooks?pageHowMany=${pageSize}&pageNum=${pageNum}&sortTitleAsc=${sortTitleAsc}${
+                    `${API_URL}/AllBooks?pageHowMany=${pageSize}&pageNum=${pageNum}&sortTitleAsc=${sortTitleAsc}${
                         selectedCategories.length ? `&${categoryParams}` : ""
                     }`
                 );
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch books");
+                }
+
                 const data = await response.json();
                 setBooks(data.books);
                 setTotalItems(data.totalNumBooks);
                 setTotalPages(Math.ceil(data.totalNumBooks / pageSize));
+            } catch (error) {
+                console.error("Error fetching books:", error);
+                setBooks([]);
+                setTotalItems(0);
+                setTotalPages(0);
             } finally {
                 setLoading(false);
             }
         };
+
         fetchBooks();
     }, [pageSize, pageNum, sortTitleAsc, selectedCategories]);
 
-    // Build page number array (max 7 visible)
     const pageNumbers = () => {
         const pages: (number | "…")[] = [];
         if (totalPages <= 7) {
@@ -75,7 +86,6 @@ function BookList({ selectedCategories }: { selectedCategories: string[] }) {
 
     return (
         <div>
-            {/* ── Toolbar ── */}
             <div className="books-toolbar">
                 <div className="result-count">
                     Showing{" "}
@@ -126,7 +136,6 @@ function BookList({ selectedCategories }: { selectedCategories: string[] }) {
                 </div>
             </div>
 
-            {/* ── Book List ── */}
             {loading ? (
                 <div className="state-box">
                     <div className="spinner" />
@@ -141,13 +150,11 @@ function BookList({ selectedCategories }: { selectedCategories: string[] }) {
                 <div>
                     {books.map((b, idx) => (
                         <div key={b.bookId} className="book-card">
-                            {/* Coloured spine accent */}
                             <div
                                 className="book-spine"
                                 style={{ background: spineColor(idx) }}
                             />
 
-                            {/* Book info */}
                             <div className="book-info">
                                 <div className="book-title">{b.title}</div>
                                 <div className="book-meta">
@@ -170,7 +177,6 @@ function BookList({ selectedCategories }: { selectedCategories: string[] }) {
                                 </div>
                             </div>
 
-                            {/* Price + actions */}
                             <div className="book-right">
                                 <div className="book-price">${b.price.toFixed(2)}</div>
                                 <div className="book-actions">
@@ -206,7 +212,6 @@ function BookList({ selectedCategories }: { selectedCategories: string[] }) {
                 </div>
             )}
 
-            {/* ── Pagination ── */}
             {totalPages > 1 && (
                 <div className="pagination-area">
                     <span className="page-info">
