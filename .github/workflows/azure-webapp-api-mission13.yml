@@ -1,16 +1,16 @@
-# Deploy Mission11.API to Azure App Service on pushes to phase-6.
+# Deploy Mission11.API to Azure App Service on pushes to Mission13.
 # Add these repository secrets (GitHub → Settings → Secrets → Actions):
 #   AZURE_WEBAPP_NAME          — App Service name (e.g. mission13backend2-hnhpf9bmdvf7c0hf)
 #   AZURE_WEBAPP_PUBLISH_PROFILE — full XML from Azure Portal → App → Download publish profile
-name: Deploy API to Azure (phase-6)
+name: Deploy API to Azure (Mission13)
 
 on:
   push:
     branches:
-      - phase-6
+      - Mission13
     paths:
       - "Mission11/backend/**"
-      - ".github/workflows/azure-webapp-api-phase6.yml"
+      - ".github/workflows/azure-webapp-api-mission13.yml"
   workflow_dispatch:
 
 jobs:
