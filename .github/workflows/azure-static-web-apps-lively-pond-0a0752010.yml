@@ -1,3 +1,12 @@
+# GitHub secret (Settings → Secrets and variables → Actions):
+#   AZURE_STATIC_WEB_APPS_API_TOKEN_LIVELY_POND_0A0752010
+#     → Azure Portal → your Static Web App → **Manage deployment token**
+#     → Regenerate if needed → copy the token → paste into this secret (one line).
+#     If the workflow says "deployment_token provided was invalid", the secret is
+#     missing, expired, or was overwritten — update it from the portal.
+#
+# app_location is relative to the repo root (no leading slash).
+#
 name: Azure Static Web Apps CI/CD
 
 on:
@@ -8,6 +17,7 @@ on:
     types: [opened, synchronize, reopened, closed]
     branches:
       - Mission13
+  workflow_dispatch:
 
 jobs:
   build_and_deploy_job:
@@ -27,7 +37,7 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_LIVELY_POND_0A0752010 }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: "/Mission11/frontend"
+          app_location: "Mission11/frontend"
           api_location: ""
           output_location: "dist"
 
